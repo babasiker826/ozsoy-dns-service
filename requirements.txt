@@ -1,4 +1,6 @@
-Flask==2.3.4 
-SQLAlchemy==2.0.22 
-Authlib==1.2.1 
+Flask==2.3.3
+SQLAlchemy==2.0.22
+Authlib==1.2.1
 Werkzeug==2.3.7
+requests==2.32.1
+gunicorn==22.2.2
