@@ -200,29 +200,32 @@ def auth_google_callback():
 def create_subdomain():
     user = current_user()
     if not user:
-        return jsonify({'ok':False, 'error':'giriş gerekli'}), 401
+        return jsonify({'ok': False, 'error': 'giriş gerekli'}), 401
+
     data = request.get_json() or {}
     sub = (data.get('sub') or '').strip().lower()
     target = (data.get('target') or '').strip()
-    # validation: only a-z0-9- allowed
+
     import re
     if not re.fullmatch(r'[a-z0-9\-]{2,63}', sub):
-        return jsonify({'ok':False, 'error':'geçersiz subdomain'}), 400
-    full = f"{sub}.supanel.org"
-    # insert
+        return jsonify({'ok': False, 'error': 'geçersiz subdomain'}), 400
+
+    # 🔥 DOĞRU DOMAIN
+    full = f"{sub}.x.supaneli.org"
+
     conn = get_db()
     try:
-        conn.execute('INSERT INTO subdomains (user_id,sub,target,active,created_at) VALUES (?,?,?,?,?)',
-                     (user['id'], sub, target or None, 1, datetime.utcnow().isoformat()))
+        conn.execute(
+            'INSERT INTO subdomains (user_id, sub, target, active, created_at) VALUES (?,?,?,?,?)',
+            (user['id'], sub, target or None, 1, datetime.utcnow().isoformat())
+        )
         conn.commit()
     except sqlite3.IntegrityError:
         conn.close()
-        return jsonify({'ok':False, 'error':'subdomain alınmış'}), 409
-    conn.close()
-    # no DNS changes needed if wildcard CNAME is set pointing to your host
-    return jsonify({'ok':True, 'full': full})
+        return jsonify({'ok': False, 'error': 'subdomain alınmış'}), 409
 
-# Simple admin-only route to list users (example)
+    conn.close()
+    return jsonify({'ok': True, 'full': full})# Simple admin-only route to list users (example)
 @app.route('/admin/users')
 def admin_users():
     # very naive admin check: SECRET_KEY match
